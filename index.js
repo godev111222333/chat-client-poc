@@ -7,6 +7,7 @@ const MessageTypeUserJoin = "USER_JOIN"
 const MessageTypeAdminJoin = "ADMIN_JOIN"
 const MessageTypeTexting = "TEXTING"
 const MessageTypeSystemResponseType = "SYSTEM_USER_JOIN_RESPONSE"
+const MessageTypeError = "ERROR"
 
 let adminAccessToken, customerAccessToken;
 
@@ -83,6 +84,10 @@ usrOpenChatBtn.addEventListener('click', function () {
                 break;
             case MessageTypeSystemResponseType:
                 conversationId = msg.conversation_id;
+                break;
+            case MessageTypeError:
+                alert(msg.content);
+                break;
         }
     })
 })
