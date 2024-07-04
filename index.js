@@ -3,11 +3,13 @@
 const endpoint = "wss://minhhungcar.xyz/chat";
 const loginEndpoint = "https://minhhungcar.xyz/login"
 
-const MessageTypeUserJoin = "USER_JOIN"
-const MessageTypeAdminJoin = "ADMIN_JOIN"
-const MessageTypeTexting = "TEXTING"
-const MessageTypeSystemResponseType = "SYSTEM_USER_JOIN_RESPONSE"
-const MessageTypeError = "ERROR"
+const MessageTypes = {
+    USER_JOIN: "USER_JOIN",
+    ADMIN_JOIN: "ADMIN_JOIN",
+    TEXTING: "TEXTING",
+    SYSTEM_USER_JOIN_RESPONSE: "SYSTEM_USER_JOIN_RESPONSE",
+    ERROR: "ERROR",
+};
 
 let adminAccessToken, customerAccessToken;
 
@@ -36,10 +38,8 @@ async function postData(url, data) {
     )).data.access_token}`
     customerAccessToken = `Bearer ${(await postData(
         loginEndpoint,
-        {'phone_number': '2222222222', 'password': 'admin'}
+        {'phone_number': '0389068116', 'password': '2222'}
     )).data.access_token}`
-    console.log(`admin access token ${adminAccessToken}`)
-    console.log(`customer access token ${customerAccessToken}`)
 })()
 
 
@@ -69,7 +69,7 @@ usrOpenChatBtn.addEventListener('click', function () {
     usrOpenChatBtn.textContent = "User opened chat session";
     socket.addEventListener('open', function () {
         socket.send(JSON.stringify({
-            msg_type: MessageTypeUserJoin,
+            msg_type: MessageTypes.USER_JOIN,
             access_token: customerAccessToken,
         }))
     })
@@ -77,15 +77,15 @@ usrOpenChatBtn.addEventListener('click', function () {
     socket.addEventListener('message', function (event) {
         const msg = JSON.parse(event.data);
         switch (msg.msg_type) {
-            case MessageTypeTexting:
+            case MessageTypes.TEXTING:
                 const newChat = document.createElement('div')
                 newChat.textContent = msg.content
                 chatHistory.appendChild(newChat)
                 break;
-            case MessageTypeSystemResponseType:
+            case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
                 conversationId = msg.conversation_id;
                 break;
-            case MessageTypeError:
+            case MessageTypes.ERROR:
                 alert(msg.content);
                 break;
         }
@@ -94,7 +94,7 @@ usrOpenChatBtn.addEventListener('click', function () {
 
 userSendMsgBtn.addEventListener('click', function () {
     socket.send(JSON.stringify({
-        msg_type: MessageTypeTexting,
+        msg_type: MessageTypes.TEXTING,
         content: usrMsg.value,
         conversation_id: conversationId,
         access_token: customerAccessToken,
@@ -105,7 +105,7 @@ userSendMsgBtn.addEventListener('click', function () {
 adminJoinChatBtn.addEventListener('click', function () {
     adminJoinChatBtn.textContent = 'Admin joined chat'
     socket.send(JSON.stringify({
-        msg_type: MessageTypeAdminJoin,
+        msg_type: MessageTypes.ADMIN_JOIN,
         access_token: adminAccessToken,
         conversation_id: conversationId
     }));
@@ -113,7 +113,7 @@ adminJoinChatBtn.addEventListener('click', function () {
 
 adminSendMsgBtn.addEventListener('click', function () {
     socket.send(JSON.stringify({
-        msg_type: MessageTypeTexting,
+        msg_type: MessageTypes.TEXTING,
         content: adminMsg.value,
         conversation_id: conversationId,
         access_token: adminAccessToken,
