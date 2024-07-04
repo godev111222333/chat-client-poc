@@ -1,12 +1,47 @@
 // const endpoint = "ws://0.0.0.0:9876/chat";
+// const loginEndpoint = "http://0.0.0.0:9876/login"
 const endpoint = "wss://minhhungcar.xyz/chat";
+const loginEndpoint = "https://minhhungcar.xyz/login"
 
 const MessageTypeUserJoin = "USER_JOIN"
 const MessageTypeAdminJoin = "ADMIN_JOIN"
 const MessageTypeTexting = "TEXTING"
 const MessageTypeSystemResponseType = "SYSTEM_USER_JOIN_RESPONSE"
 
-const AuthorizeAccessToken = "1"
+let adminAccessToken, customerAccessToken;
+
+async function postData(url, data) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+(async function () {
+    adminAccessToken = `Bearer ${(await postData(
+        loginEndpoint,
+        {'phone_number': 'admin', 'password': 'admin'}
+    )).data.access_token}`
+    customerAccessToken = `Bearer ${(await postData(
+        loginEndpoint,
+        {'phone_number': '2222222222', 'password': 'admin'}
+    )).data.access_token}`
+    console.log(`admin access token ${adminAccessToken}`)
+    console.log(`customer access token ${customerAccessToken}`)
+})()
+
+
 
 let socket;
 let conversationId;
@@ -34,7 +69,7 @@ usrOpenChatBtn.addEventListener('click', function () {
     socket.addEventListener('open', function () {
         socket.send(JSON.stringify({
             msg_type: MessageTypeUserJoin,
-            access_token: AuthorizeAccessToken,
+            access_token: customerAccessToken,
         }))
     })
 
@@ -57,6 +92,7 @@ userSendMsgBtn.addEventListener('click', function () {
         msg_type: MessageTypeTexting,
         content: usrMsg.value,
         conversation_id: conversationId,
+        access_token: customerAccessToken,
     }));
     usrMsg.value = '';
 })
@@ -65,6 +101,8 @@ adminJoinChatBtn.addEventListener('click', function () {
     adminJoinChatBtn.textContent = 'Admin joined chat'
     socket.send(JSON.stringify({
         msg_type: MessageTypeAdminJoin,
+        access_token: adminAccessToken,
+        conversation_id: conversationId
     }));
 })
 
@@ -73,6 +111,7 @@ adminSendMsgBtn.addEventListener('click', function () {
         msg_type: MessageTypeTexting,
         content: adminMsg.value,
         conversation_id: conversationId,
+        access_token: adminAccessToken,
     }));
     adminMsg.value = '';
 })
