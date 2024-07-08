@@ -73,7 +73,7 @@ socket.addEventListener('message', function (event) {
             chatHistory.appendChild(newChat)
             break;
         case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
-            conversationId = msg.conversation_id;
+            // conversationId = msg.conversation_id;
             break;
         case MessageTypes.ERROR:
             alert(msg.content);
@@ -83,12 +83,10 @@ socket.addEventListener('message', function (event) {
 
 usrOpenChatBtn.addEventListener('click', function () {
     usrOpenChatBtn.textContent = "User opened chat session";
-    socket.addEventListener('open', function () {
-        socket.send(JSON.stringify({
-            msg_type: MessageTypes.USER_JOIN,
-            access_token: customerAccessToken,
-        }))
-    })
+    socket.send(JSON.stringify({
+        msg_type: MessageTypes.USER_JOIN,
+        access_token: customerAccessToken,
+    }))
 })
 
 userSendMsgBtn.addEventListener('click', function () {
@@ -103,11 +101,15 @@ userSendMsgBtn.addEventListener('click', function () {
 
 adminJoinChatBtn.addEventListener('click', function () {
     adminJoinChatBtn.textContent = 'Admin joined chat'
-    socket.send(JSON.stringify({
-        msg_type: MessageTypes.ADMIN_JOIN,
-        access_token: adminAccessToken,
-        conversation_id: conversationId
-    }));
+    try {
+        socket.send(JSON.stringify({
+            msg_type: MessageTypes.ADMIN_JOIN,
+            access_token: adminAccessToken,
+            conversation_id: conversationId
+        }));
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 adminSendMsgBtn.addEventListener('click', function () {
