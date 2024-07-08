@@ -13,7 +13,7 @@ const MessageTypes = {
 
 let adminAccessToken, customerAccessToken;
 
-let socket;
+let [userSocket, adminSocket] = [new WebSocket(endpoint), new WebSocket(endpoint)];
 let conversationId = 82;
 
 async function postData(url, data) {
@@ -52,7 +52,8 @@ const [usrOpenChatBtn,
     adminJoinChatBtn,
     adminSendMsgBtn,
     adminMsg,
-    chatHistory,
+    userChatHistory,
+    adminChatHistory
 ] = [
     document.getElementById("btnUserOpenChatSession"),
     document.getElementById("btnUsrSendMsg"),
@@ -60,17 +61,17 @@ const [usrOpenChatBtn,
     document.getElementById("btnAdminJoinChatSession"),
     document.getElementById("btnAdminSendMsg"),
     document.getElementById("adminMsg"),
-    document.getElementById("chatHistory"),
+    document.getElementById("userChatHistory"),
+    document.getElementById("adminChatHistory"),
 ];
 
-socket = new WebSocket(endpoint);
-socket.addEventListener('message', function (event) {
+function handleUserMsgFunc(event) {
     const msg = JSON.parse(event.data);
     switch (msg.msg_type) {
         case MessageTypes.TEXTING:
             const newChat = document.createElement('div')
             newChat.textContent = msg.content
-            chatHistory.appendChild(newChat)
+            userChatHistory.appendChild(newChat)
             break;
         case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
             // conversationId = msg.conversation_id;
@@ -79,18 +80,37 @@ socket.addEventListener('message', function (event) {
             alert(msg.content);
             break;
     }
-})
+}
+
+function handleAdminMsgFunc(event) {
+    const msg = JSON.parse(event.data);
+    switch (msg.msg_type) {
+        case MessageTypes.TEXTING:
+            const newChat = document.createElement('div')
+            newChat.textContent = msg.content
+            adminChatHistory.appendChild(newChat)
+            break;
+        case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
+            break;
+        case MessageTypes.ERROR:
+            alert(msg.content);
+            break;
+    }
+}
+
+userSocket.addEventListener('message', handleUserMsgFunc)
+adminSocket.addEventListener('message', handleAdminMsgFunc)
 
 usrOpenChatBtn.addEventListener('click', function () {
     usrOpenChatBtn.textContent = "User opened chat session";
-    socket.send(JSON.stringify({
+    userSocket.send(JSON.stringify({
         msg_type: MessageTypes.USER_JOIN,
         access_token: customerAccessToken,
     }))
 })
 
 userSendMsgBtn.addEventListener('click', function () {
-    socket.send(JSON.stringify({
+    userSocket.send(JSON.stringify({
         msg_type: MessageTypes.TEXTING,
         content: usrMsg.value,
         conversation_id: conversationId,
@@ -102,7 +122,7 @@ userSendMsgBtn.addEventListener('click', function () {
 adminJoinChatBtn.addEventListener('click', function () {
     adminJoinChatBtn.textContent = 'Admin joined chat'
     try {
-        socket.send(JSON.stringify({
+        adminSocket.send(JSON.stringify({
             msg_type: MessageTypes.ADMIN_JOIN,
             access_token: adminAccessToken,
             conversation_id: conversationId
@@ -113,7 +133,7 @@ adminJoinChatBtn.addEventListener('click', function () {
 })
 
 adminSendMsgBtn.addEventListener('click', function () {
-    socket.send(JSON.stringify({
+    adminSocket.send(JSON.stringify({
         msg_type: MessageTypes.TEXTING,
         content: adminMsg.value,
         conversation_id: conversationId,
