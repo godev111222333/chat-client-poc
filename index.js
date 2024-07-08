@@ -13,11 +13,14 @@ const MessageTypes = {
 
 let adminAccessToken, customerAccessToken;
 
+let socket;
+let conversationId = 82;
+
 async function postData(url, data) {
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         });
 
@@ -43,10 +46,6 @@ async function postData(url, data) {
 })()
 
 
-
-let socket;
-let conversationId;
-
 const [usrOpenChatBtn,
     userSendMsgBtn,
     usrMsg,
@@ -64,31 +63,31 @@ const [usrOpenChatBtn,
     document.getElementById("chatHistory"),
 ];
 
+socket = new WebSocket(endpoint);
+socket.addEventListener('message', function (event) {
+    const msg = JSON.parse(event.data);
+    switch (msg.msg_type) {
+        case MessageTypes.TEXTING:
+            const newChat = document.createElement('div')
+            newChat.textContent = msg.content
+            chatHistory.appendChild(newChat)
+            break;
+        case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
+            conversationId = msg.conversation_id;
+            break;
+        case MessageTypes.ERROR:
+            alert(msg.content);
+            break;
+    }
+})
+
 usrOpenChatBtn.addEventListener('click', function () {
-    socket = new WebSocket(endpoint);
     usrOpenChatBtn.textContent = "User opened chat session";
     socket.addEventListener('open', function () {
         socket.send(JSON.stringify({
             msg_type: MessageTypes.USER_JOIN,
             access_token: customerAccessToken,
         }))
-    })
-
-    socket.addEventListener('message', function (event) {
-        const msg = JSON.parse(event.data);
-        switch (msg.msg_type) {
-            case MessageTypes.TEXTING:
-                const newChat = document.createElement('div')
-                newChat.textContent = msg.content
-                chatHistory.appendChild(newChat)
-                break;
-            case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
-                conversationId = msg.conversation_id;
-                break;
-            case MessageTypes.ERROR:
-                alert(msg.content);
-                break;
-        }
     })
 })
 
