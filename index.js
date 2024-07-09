@@ -14,7 +14,7 @@ const MessageTypes = {
 let adminAccessToken, customerAccessToken;
 
 let [userSocket, adminSocket] = [new WebSocket(endpoint), new WebSocket(endpoint)];
-let conversationId = 82;
+let conversationId;
 
 async function postData(url, data) {
     try {
@@ -69,12 +69,13 @@ function handleUserMsgFunc(event) {
     const msg = JSON.parse(event.data);
     switch (msg.msg_type) {
         case MessageTypes.TEXTING:
+            console.log(JSON.stringify(msg))
             const newChat = document.createElement('div')
             newChat.textContent = msg.content
             userChatHistory.appendChild(newChat)
             break;
         case MessageTypes.SYSTEM_USER_JOIN_RESPONSE:
-            // conversationId = msg.conversation_id;
+            conversationId = msg.conversation_id;
             break;
         case MessageTypes.ERROR:
             alert(msg.content);
@@ -86,6 +87,7 @@ function handleAdminMsgFunc(event) {
     const msg = JSON.parse(event.data);
     switch (msg.msg_type) {
         case MessageTypes.TEXTING:
+            console.log(JSON.stringify(msg))
             const newChat = document.createElement('div')
             newChat.textContent = msg.content
             adminChatHistory.appendChild(newChat)
