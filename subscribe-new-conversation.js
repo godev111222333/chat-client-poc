@@ -1,4 +1,4 @@
-const notiEndpoint = "ws://0.0.0.0:9876/admin/subscribe_notification";
+const notiEndpoint = "ws://0.0.0.0:9876/admin/subscribe_conversation";
 const loginEndpoint = "http://0.0.0.0:9876/login"
 // const notiEndpoint = "wss://minhhungcar.xyz/admin/subscribe_notification";
 // const loginEndpoint = "https://minhhungcar.xyz/login"
@@ -30,9 +30,9 @@ async function postData(url, data) {
 })()
 
 let socket = new WebSocket(notiEndpoint)
-const [notification_history,
+const [new_conver_history,
     openSocketBtn] = [
-        document.getElementById('notification_history'),
+        document.getElementById('new_conversation_history'),
         document.getElementById('openSocketBtn')
     ]
 
@@ -43,8 +43,8 @@ openSocketBtn.addEventListener('click', function () {
 
 
 socket.addEventListener('message', function (event) {
-    const notification = JSON.parse(event.data)
-    const newNoti = document.createElement('div')
-    newNoti.textContent = JSON.stringify(notification)
-    notification_history.appendChild(newNoti)
+    const newConversation = JSON.parse(event.data)
+    const newConv = document.createElement('div')
+    newConv.textContent = JSON.stringify(newConversation)
+    new_conver_history.appendChild(newConv)
 })
