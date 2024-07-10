@@ -1,7 +1,7 @@
-const notiEndpoint = "ws://0.0.0.0:9876/admin/subscribe_conversation";
-const loginEndpoint = "http://0.0.0.0:9876/login"
-// const notiEndpoint = "wss://minhhungcar.xyz/admin/subscribe_notification";
-// const loginEndpoint = "https://minhhungcar.xyz/login"
+// const notiEndpoint = "ws://0.0.0.0:9876/admin/subscribe_conversation";
+// const loginEndpoint = "http://0.0.0.0:9876/login"
+const notiEndpoint = "wss://minhhungcar.xyz/admin/subscribe_conversation";
+const loginEndpoint = "https://minhhungcar.xyz/login"
 
 let adminAccessToken;
 async function postData(url, data) {
